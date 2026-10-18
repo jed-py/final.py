@@ -1,0 +1,1354 @@
+
+import tkinter as tk
+from tkinter import messagebox, simpledialog
+
+
+class PetLink:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("PetLink: An Online Adoption & Tracking System")
+        self.root.geometry("1000x650")
+
+        # COLORS
+        self.BG_COLOR = "#EAF4F4"
+        self.NAV_COLOR = "#315B5B"
+        self.BUTTON_COLOR = "#568585"
+        self.WHITE = "#FFFFFF"
+        self.TEXT_COLOR = "#222222"
+        self.SUBTEXT_COLOR = "#777777"
+        self.GREEN = "#4F8A5B"
+        self.RED = "#B85C5C"
+        self.YELLOW = "#B58B35"
+
+        # STORAGE (NO DATABASE)
+        self.accounts = {}
+        self.pets = []
+        self.stray_reports = []
+        self.applications = []
+        self.current_user = None
+
+        self.show_login()
+
+    # =====================================================
+    # GENERAL HELPERS
+    # =====================================================
+
+    def clear_window(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+    def clear_content(self):
+        if hasattr(self, "content_frame"):
+            for widget in self.content_frame.winfo_children():
+                widget.destroy()
+
+    def make_title(self, text):
+        tk.Label(
+            self.content_frame,
+            text=text,
+            font=("Arial", 24, "bold"),
+            bg=self.BG_COLOR,
+            fg=self.TEXT_COLOR
+        ).pack(fill="x", padx=30, pady=(25, 15))
+
+    def make_message(self, text):
+        tk.Label(
+            self.content_frame,
+            text=text,
+            font=("Arial", 13),
+            bg=self.BG_COLOR,
+            fg=self.SUBTEXT_COLOR
+        ).pack(fill="x", pady=25)
+
+    # =====================================================
+    # LOGIN
+    # =====================================================
+
+    def show_login(self):
+        self.clear_window()
+        self.root.geometry("700x520")
+        self.root.configure(bg=self.BG_COLOR)
+
+        header = tk.Frame(self.root, bg=self.NAV_COLOR, height=80)
+        header.pack(fill="x")
+        header.pack_propagate(False)
+
+        tk.Label(
+            header,
+            text="PETLINK",
+            font=("Arial", 27, "bold"),
+            bg=self.NAV_COLOR,
+            fg=self.WHITE
+        ).pack(pady=20)
+
+        tk.Label(
+            self.root,
+            text="Welcome to PetLink!",
+            font=("Arial", 27, "bold"),
+            bg=self.BG_COLOR,
+            fg=self.TEXT_COLOR
+        ).pack(pady=(35, 5))
+
+        tk.Label(
+            self.root,
+            text="An Online Adoption & Tracking System",
+            font=("Arial", 14),
+            bg=self.BG_COLOR,
+            fg=self.SUBTEXT_COLOR
+        ).pack()
+
+        box = tk.Frame(self.root, bg=self.WHITE, width=430, height=300)
+        box.pack(pady=20)
+        box.pack_propagate(False)
+
+        tk.Label(
+            box,
+            text="Log In",
+            font=("Arial", 24, "bold"),
+            bg=self.WHITE,
+            fg=self.TEXT_COLOR
+        ).pack(pady=(18, 10))
+
+        tk.Label(
+            box,
+            text="Username",
+            font=("Arial", 12),
+            bg=self.WHITE,
+            fg=self.TEXT_COLOR
+        ).place(x=50, y=65)
+
+        self.username_entry = tk.Entry(box, font=("Arial", 13))
+        self.username_entry.place(x=50, y=90, width=330, height=30)
+
+        tk.Label(
+            box,
+            text="Password",
+            font=("Arial", 12),
+            bg=self.WHITE,
+            fg=self.TEXT_COLOR
+        ).place(x=50, y=130)
+
+        self.password_entry = tk.Entry(box, font=("Arial", 13), show="*")
+        self.password_entry.place(x=50, y=155, width=330, height=30)
+
+        tk.Button(
+            box,
+            text="Log In",
+            font=("Arial", 12, "bold"),
+            bg=self.BUTTON_COLOR,
+            fg=self.WHITE,
+            bd=0,
+            cursor="hand2",
+            command=self.login
+        ).place(x=125, y=198, width=180, height=38)
+
+        tk.Button(
+            box,
+            text="Create an Account",
+            font=("Arial", 11),
+            bg=self.WHITE,
+            fg=self.NAV_COLOR,
+            bd=0,
+            cursor="hand2",
+            command=self.show_register
+        ).place(relx=0.5, y=263, anchor="center")
+
+        self.username_entry.focus()
+
+    # =====================================================
+    # REGISTER
+    # =====================================================
+
+    def show_register(self):
+        self.clear_window()
+        self.root.geometry("700x560")
+        self.root.configure(bg=self.BG_COLOR)
+
+        header = tk.Frame(self.root, bg=self.NAV_COLOR, height=80)
+        header.pack(fill="x")
+        header.pack_propagate(False)
+
+        tk.Label(
+            header,
+            text="PETLINK",
+            font=("Arial", 27, "bold"),
+            bg=self.NAV_COLOR,
+            fg=self.WHITE
+        ).pack(pady=20)
+
+        box = tk.Frame(self.root, bg=self.WHITE, width=430, height=450)
+        box.pack(pady=15)
+        box.pack_propagate(False)
+
+        tk.Label(
+            box,
+            text="Create an Account",
+            font=("Arial", 23, "bold"),
+            bg=self.WHITE,
+            fg=self.TEXT_COLOR
+        ).pack(pady=(15, 8))
+
+        tk.Label(
+            box,
+            text="First Name",
+            font=("Arial", 12),
+            bg=self.WHITE,
+            fg=self.TEXT_COLOR
+        ).place(x=50, y=58)
+
+        first_name = tk.Entry(box, font=("Arial", 13))
+        first_name.place(x=50, y=82, width=330, height=30)
+
+        tk.Label(
+            box,
+            text="Second Name",
+            font=("Arial", 12),
+            bg=self.WHITE,
+            fg=self.TEXT_COLOR
+        ).place(x=50, y=118)
+
+        second_name = tk.Entry(box, font=("Arial", 13))
+        second_name.place(x=50, y=142, width=330, height=30)
+
+        tk.Label(
+            box,
+            text="Password",
+            font=("Arial", 12),
+            bg=self.WHITE,
+            fg=self.TEXT_COLOR
+        ).place(x=50, y=178)
+
+        password = tk.Entry(box, font=("Arial", 13), show="*")
+        password.place(x=50, y=202, width=330, height=30)
+
+        tk.Label(
+            box,
+            text="Confirm Password",
+            font=("Arial", 12),
+            bg=self.WHITE,
+            fg=self.TEXT_COLOR
+        ).place(x=50, y=238)
+
+        confirm_password = tk.Entry(box, font=("Arial", 13), show="*")
+        confirm_password.place(x=50, y=262, width=330, height=30)
+
+        show_password = tk.BooleanVar(value=False)
+
+        def toggle_password():
+            mode = "" if show_password.get() else "*"
+            password.config(show=mode)
+            confirm_password.config(show=mode)
+
+        tk.Checkbutton(
+            box,
+            text="Show Password",
+            variable=show_password,
+            command=toggle_password,
+            bg=self.WHITE,
+            fg=self.TEXT_COLOR,
+            activebackground=self.WHITE
+        ).place(x=50, y=295)
+
+        tk.Button(
+            box,
+            text="Create Account",
+            font=("Arial", 12, "bold"),
+            bg=self.BUTTON_COLOR,
+            fg=self.WHITE,
+            bd=0,
+            cursor="hand2",
+            command=lambda: self.register(
+                first_name, second_name, password, confirm_password
+            )
+        ).place(x=125, y=328, width=180, height=38)
+
+        tk.Button(
+            box,
+            text="Back to Login",
+            font=("Arial", 11),
+            bg=self.WHITE,
+            fg=self.NAV_COLOR,
+            bd=0,
+            cursor="hand2",
+            command=self.show_login
+        ).place(relx=0.5, y=400, anchor="center")
+
+    def register(self, first_name, second_name, password, confirm_password):
+        first = first_name.get().strip()
+        second = second_name.get().strip()
+        pw = password.get()
+        confirm = confirm_password.get()
+
+        if not first or not second:
+            messagebox.showinfo(
+                "PetLink",
+                "Please enter your first and second name."
+            )
+            return
+
+        if not pw:
+            messagebox.showinfo("PetLink", "Please enter a password.")
+            return
+
+        if pw != confirm:
+            messagebox.showerror("PetLink", "Passwords do not match.")
+            return
+
+        username = "".join(
+            char for char in (first + second).lower()
+            if char.isalpha()
+        )
+
+        original = username
+        counter = 1
+
+        while username in self.accounts:
+            username = original + "a" * counter
+            counter += 1
+
+        self.accounts[username] = {
+            "password": pw,
+            "first_name": first,
+            "second_name": second,
+            "adopted": [],
+            "rescued": []
+        }
+
+        messagebox.showinfo(
+            "Account Created",
+            "Account successfully created!\n\nYour username is:\n" + username
+        )
+
+        self.show_login()
+        self.username_entry.insert(0, username)
+        self.password_entry.focus()
+
+    # =====================================================
+    # LOGIN CHECK
+    # =====================================================
+
+    def login(self):
+        username = self.username_entry.get().strip()
+        password = self.password_entry.get()
+
+        if not username:
+            messagebox.showinfo("PetLink", "Please enter your username.")
+            return
+
+        if not password:
+            messagebox.showinfo("PetLink", "Please enter your password.")
+            return
+
+        if username not in self.accounts:
+            messagebox.showerror("Login Failed", "Account not found.")
+            return
+
+        if self.accounts[username]["password"] != password:
+            messagebox.showerror("Login Failed", "Incorrect password.")
+            return
+
+        self.current_user = username
+        self.show_dashboard()
+
+    # =====================================================
+    # NAVIGATION
+    # =====================================================
+
+    def create_main_layout(self):
+        self.nav_frame = tk.Frame(self.root, bg=self.NAV_COLOR, height=70)
+        self.nav_frame.pack(fill="x")
+        self.nav_frame.pack_propagate(False)
+
+        tk.Label(
+            self.nav_frame,
+            text="PETLINK",
+            font=("Arial", 20, "bold"),
+            bg=self.NAV_COLOR,
+            fg=self.WHITE
+        ).pack(side="left", padx=15)
+
+        nav_buttons = [
+            ("Dashboard", self.show_dashboard),
+            ("Profile Pet", self.show_profile_pet),
+            ("Pet Posting", self.show_pet_posting),
+            ("Stray Status", self.show_stray_status),
+            ("Application Form", self.show_application_form),
+            ("Profile", self.show_profile),
+            ("Admin", self.open_admin),
+            ("Log Out", self.logout)
+        ]
+
+        for text, command in nav_buttons:
+            tk.Button(
+                self.nav_frame,
+                text=text,
+                command=command,
+                font=("Arial", 9),
+                bg=self.NAV_COLOR,
+                fg=self.WHITE,
+                activebackground=self.BUTTON_COLOR,
+                activeforeground=self.WHITE,
+                relief="flat",
+                bd=0,
+                padx=6,
+                cursor="hand2"
+            ).pack(side="left", padx=1)
+
+        self.content_frame = tk.Frame(self.root, bg=self.BG_COLOR)
+        self.content_frame.pack(fill="both", expand=True)
+
+    def show_dashboard(self):
+        self.clear_window()
+        self.root.geometry("1000x650")
+        self.root.configure(bg=self.BG_COLOR)
+        self.create_main_layout()
+
+    # =====================================================
+    # PROFILE PET
+    # =====================================================
+
+    def show_profile_pet(self):
+        self.clear_content()
+        self.make_title("Profile Pet")
+
+        frame = tk.Frame(self.content_frame, bg=self.BG_COLOR)
+        frame.pack(fill="both", expand=True, padx=40)
+
+        my_pets = [
+            pet for pet in self.pets
+            if pet["posted_by"] == self.current_user
+        ]
+
+        if not my_pets:
+            self.make_message("No records.")
+            return
+
+        for pet in my_pets:
+            box = tk.Frame(frame, bg=self.WHITE, padx=10, pady=10)
+            box.pack(fill="x", pady=6)
+
+            tk.Label(
+                box,
+                text=pet["name"],
+                font=("Arial", 16, "bold"),
+                bg=self.WHITE,
+                fg=self.TEXT_COLOR
+            ).pack(pady=4)
+
+            tk.Label(
+                box,
+                text=f"Breed: {pet['breed']} | Age: {pet['age']} | "
+                     f"Status: {pet['status']}",
+                font=("Arial", 11),
+                bg=self.WHITE,
+                fg=self.SUBTEXT_COLOR
+            ).pack()
+
+            if pet["status"] == "Available":
+                tk.Button(
+                    box,
+                    text="Adopt",
+                    bg=self.BUTTON_COLOR,
+                    fg=self.WHITE,
+                    bd=0,
+                    cursor="hand2",
+                    command=lambda p=pet: self.adopt_pet(p)
+                ).pack(pady=6)
+            else:
+                tk.Label(
+                    box,
+                    text="Not Available",
+                    bg=self.WHITE,
+                    fg=self.RED
+                ).pack(pady=6)
+
+    # =====================================================
+    # ADOPTION
+    # =====================================================
+
+    def adopt_pet(self, pet):
+        if pet["status"] != "Available":
+            messagebox.showinfo("PetLink", "This pet is not available.")
+            return
+
+        for application in self.applications:
+            if (
+                application["username"] == self.current_user
+                and application["pet_record"] is pet
+                and application["status"] == "Pending"
+            ):
+                messagebox.showinfo(
+                    "PetLink",
+                    "You already have a pending application for this pet."
+                )
+                return
+
+        answer = messagebox.askyesno(
+            "Adoption Application",
+            f"Do you want to apply to adopt {pet['name']}?"
+        )
+
+        if not answer:
+            return
+
+        self.applications.append({
+            "username": self.current_user,
+            "pet": pet["name"],
+            "breed": pet["breed"],
+            "age": pet["age"],
+            "status": "Pending",
+            "pet_record": pet
+        })
+
+        messagebox.showinfo(
+            "Application Submitted",
+            "Your adoption application has been submitted.\n"
+            "Please wait for the admin to review it."
+        )
+
+        self.show_application_form()
+
+    # =====================================================
+    # PET POSTING
+    # =====================================================
+
+    def show_pet_posting(self):
+        self.clear_content()
+        self.make_title("Pet Posting")
+
+        tk.Label(
+            self.content_frame,
+            text="Fill in the required information.",
+            font=("Arial", 10),
+            bg=self.BG_COLOR,
+            fg=self.SUBTEXT_COLOR
+        ).pack(pady=(0, 10))
+
+        form = tk.Frame(
+            self.content_frame,
+            bg=self.WHITE,
+            padx=20,
+            pady=12,
+            highlightbackground="#D3E1E1",
+            highlightthickness=1
+        )
+        form.pack(fill="x", padx=35, pady=(0, 10))
+        form.grid_columnconfigure(1, weight=1)
+
+        label_style = {
+            "font": ("Arial", 10, "bold"),
+            "bg": self.WHITE,
+            "fg": self.TEXT_COLOR,
+            "anchor": "w"
+        }
+
+        tk.Label(
+            form,
+            text="Post Category",
+            **label_style
+        ).grid(row=0, column=0, sticky="w", padx=(0, 12), pady=5)
+
+        self.post_kind_var = tk.StringVar(value="Pet for Adoption")
+
+        tk.OptionMenu(
+            form,
+            self.post_kind_var,
+            "Pet for Adoption",
+            "Stray Status Report",
+            command=lambda choice: self.update_posting_fields()
+        ).grid(row=0, column=1, sticky="ew", pady=5)
+
+        self.post_fields_frame = tk.Frame(form, bg=self.WHITE)
+        self.post_fields_frame.grid(
+            row=1, column=0, columnspan=2, sticky="ew"
+        )
+        self.post_fields_frame.grid_columnconfigure(1, weight=1)
+
+        tk.Button(
+            form,
+            text="Submit Post",
+            font=("Arial", 10, "bold"),
+            bg=self.BUTTON_COLOR,
+            fg=self.WHITE,
+            activebackground=self.NAV_COLOR,
+            activeforeground=self.WHITE,
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            command=self.post_pet
+        ).grid(
+            row=2, column=0, columnspan=2,
+            sticky="e", pady=(10, 0), ipadx=15, ipady=5
+        )
+
+        tk.Label(
+            self.content_frame,
+            text="My Submissions",
+            font=("Arial", 14, "bold"),
+            bg=self.BG_COLOR,
+            fg=self.TEXT_COLOR,
+            anchor="w"
+        ).pack(fill="x", padx=35, pady=(0, 5))
+
+        records_container = tk.Frame(self.content_frame, bg=self.BG_COLOR)
+        records_container.pack(
+            fill="both", expand=True, padx=35, pady=(0, 10)
+        )
+
+        canvas = tk.Canvas(
+            records_container,
+            bg=self.BG_COLOR,
+            highlightthickness=0
+        )
+        scrollbar = tk.Scrollbar(
+            records_container,
+            orient="vertical",
+            command=canvas.yview
+        )
+
+        self.posted_frame = tk.Frame(canvas, bg=self.BG_COLOR)
+
+        self.posted_frame.bind(
+            "<Configure>",
+            lambda event: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+
+        window_id = canvas.create_window(
+            (0, 0),
+            window=self.posted_frame,
+            anchor="nw"
+        )
+
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.bind(
+            "<Configure>",
+            lambda event: canvas.itemconfigure(
+                window_id, width=event.width
+            )
+        )
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        self.update_posting_fields()
+        self.display_my_posts()
+
+    def update_posting_fields(self):
+        for widget in self.post_fields_frame.winfo_children():
+            widget.destroy()
+
+        self.post_fields_frame.grid_columnconfigure(1, weight=1)
+
+        label_style = {
+            "font": ("Arial", 10, "bold"),
+            "bg": self.WHITE,
+            "fg": self.TEXT_COLOR,
+            "anchor": "w"
+        }
+
+        entry_style = {
+            "font": ("Arial", 10),
+            "relief": "solid",
+            "bd": 1
+        }
+
+        def add_entry(label, row, attribute):
+            tk.Label(
+                self.post_fields_frame,
+                text=label,
+                **label_style
+            ).grid(
+                row=row, column=0, sticky="w",
+                padx=(0, 12), pady=6
+            )
+
+            entry = tk.Entry(self.post_fields_frame, **entry_style)
+            entry.grid(
+                row=row, column=1, sticky="ew",
+                pady=6, ipady=4
+            )
+
+            setattr(self, attribute, entry)
+
+        if self.post_kind_var.get() == "Pet for Adoption":
+            add_entry("Pet Name", 0, "pet_name_entry")
+            add_entry("Age", 1, "pet_age_entry")
+            add_entry("Breed", 2, "pet_breed_entry")
+
+        else:
+            # STRAY REPORT: DOG OR CAT
+            tk.Label(
+                self.post_fields_frame,
+                text="Animal Type",
+                **label_style
+            ).grid(
+                row=0, column=0, sticky="w",
+                padx=(0, 12), pady=6
+            )
+
+            self.stray_animal_type = tk.StringVar(value="Dog")
+
+            tk.OptionMenu(
+                self.post_fields_frame,
+                self.stray_animal_type,
+                "Dog",
+                "Cat"
+            ).grid(
+                row=0, column=1, sticky="ew", pady=6
+            )
+
+            add_entry("Breed", 1, "pet_breed_entry")
+            add_entry("Location / Barangay", 2, "pet_location_entry")
+
+            tk.Label(
+                self.post_fields_frame,
+                text="Additional Information",
+                **label_style
+            ).grid(
+                row=3, column=0, sticky="nw",
+                padx=(0, 12), pady=6
+            )
+
+            self.pet_info_text = tk.Text(
+                self.post_fields_frame,
+                font=("Arial", 10),
+                height=3,
+                wrap="word",
+                relief="solid",
+                bd=1
+            )
+            self.pet_info_text.grid(
+                row=3, column=1, sticky="ew", pady=6
+            )
+
+            tk.Label(
+                self.post_fields_frame,
+                text="Location must be within Pangasinan.",
+                font=("Arial", 9, "italic"),
+                bg=self.WHITE,
+                fg=self.SUBTEXT_COLOR
+            ).grid(
+                row=4, column=0, columnspan=2,
+                sticky="w", pady=(3, 0)
+            )
+
+    # =====================================================
+    # SUBMIT POST
+    # =====================================================
+
+    def post_pet(self):
+        category = self.post_kind_var.get()
+
+        if category == "Pet for Adoption":
+            name = self.pet_name_entry.get().strip()
+            age = self.pet_age_entry.get().strip()
+            breed = self.pet_breed_entry.get().strip()
+
+            if not name or not age or not breed:
+                messagebox.showwarning(
+                    "Incomplete Information",
+                    "Please enter the pet's name, age, and breed."
+                )
+                return
+
+            self.pets.append({
+                "name": name,
+                "age": age,
+                "breed": breed,
+                "type": "Unknown",
+                "location": "Not provided",
+                "info": "No additional information provided.",
+                "status": "Available",
+                "posted_by": self.current_user,
+                "adopted_by": None
+            })
+
+            message = "The pet has been posted successfully"
+
+        else:
+            animal_type = self.stray_animal_type.get()
+            breed = self.pet_breed_entry.get().strip()
+            location = self.pet_location_entry.get().strip()
+            info = self.pet_info_text.get("1.0", tk.END).strip()
+
+            if not breed or not location or not info:
+                messagebox.showwarning(
+                    "Incomplete Information",
+                    "Please enter the breed, location, and additional information."
+                )
+                return
+
+            # Save the selected dog or cat type
+            self.stray_reports.append({
+                "name": animal_type,
+                "age": "Unknown",
+                "breed": breed,
+                "type": animal_type,
+                "location": location,
+                "province": "Pangasinan",
+                "info": info,
+                "status": "Reported",
+                "reported_by": self.current_user
+            })
+
+            message = (
+                f"The stray {animal_type.lower()} report "
+                "has been submitted successfully."
+            )
+
+        messagebox.showinfo("Submission Successful", message)
+        self.show_pet_posting()
+
+    # =====================================================
+    # DISPLAY MY SUBMISSIONS
+    # =====================================================
+
+    def display_my_posts(self):
+        for widget in self.posted_frame.winfo_children():
+            widget.destroy()
+
+        my_pets = [
+            pet for pet in self.pets
+            if pet["posted_by"] == self.current_user
+        ]
+
+        my_reports = [
+            report for report in self.stray_reports
+            if report["reported_by"] == self.current_user
+        ]
+
+        if not my_pets and not my_reports:
+            tk.Label(
+                self.posted_frame,
+                text="No submissions yet.",
+                font=("Arial", 10),
+                bg=self.BG_COLOR,
+                fg=self.SUBTEXT_COLOR
+            ).pack(pady=12)
+            return
+
+        def add_card(title, category, breed, age, location, status, info):
+            card = tk.Frame(
+                self.posted_frame,
+                bg=self.WHITE,
+                padx=12,
+                pady=8,
+                highlightbackground="#D3E1E1",
+                highlightthickness=1
+            )
+            card.pack(fill="x", pady=4)
+
+            tk.Label(
+                card,
+                text=title,
+                font=("Arial", 11, "bold"),
+                bg=self.WHITE,
+                fg=self.NAV_COLOR,
+                anchor="w"
+            ).pack(fill="x", pady=(0, 3))
+
+            tk.Label(
+                card,
+                text=f"Category: {category} | Breed: {breed} | Age: {age}",
+                font=("Arial", 9),
+                bg=self.WHITE,
+                fg=self.TEXT_COLOR,
+                anchor="w",
+                wraplength=850,
+                justify="left"
+            ).pack(fill="x")
+
+            tk.Label(
+                card,
+                text=f"Location: {location} | Status: {status}",
+                font=("Arial", 9, "bold"),
+                bg=self.WHITE,
+                fg=self.TEXT_COLOR,
+                anchor="w",
+                wraplength=850,
+                justify="left"
+            ).pack(fill="x", pady=(3, 0))
+
+            tk.Label(
+                card,
+                text=f"Additional Information: {info}",
+                font=("Arial", 9),
+                bg=self.WHITE,
+                fg=self.SUBTEXT_COLOR,
+                anchor="w",
+                wraplength=850,
+                justify="left"
+            ).pack(fill="x", pady=(3, 0))
+
+        for pet in my_pets:
+            add_card(
+                pet["name"],
+                "Pet for Adoption",
+                pet["breed"],
+                pet["age"],
+                pet.get("location", "Not provided"),
+                pet["status"],
+                pet.get("info", "None")
+            )
+
+        for report in my_reports:
+            add_card(
+                report["name"],
+                "Stray Status Report",
+                report["breed"],
+                report["age"],
+                report["location"] + ", Pangasinan",
+                report["status"],
+                report["info"]
+            )
+
+    # =====================================================
+    # STRAY STATUS
+    # =====================================================
+
+    def show_stray_status(self):
+        self.clear_content()
+        self.make_title("Stray Status")
+
+        tk.Label(
+            self.content_frame,
+            text="",
+            font=("Arial", 12, "bold"),
+            bg=self.BG_COLOR,
+            fg=self.NAV_COLOR
+        ).pack(pady=(0, 10))
+
+        frame = tk.Frame(self.content_frame, bg=self.BG_COLOR)
+        frame.pack(fill="both", expand=True, padx=40)
+
+        if not self.stray_reports:
+            tk.Label(
+                frame,
+                text="No records.",
+                font=("Arial", 13),
+                bg=self.BG_COLOR,
+                fg=self.SUBTEXT_COLOR
+            ).pack(pady=30)
+            return
+
+        for report in self.stray_reports:
+            box = tk.Frame(frame, bg=self.WHITE, padx=12, pady=10)
+            box.pack(fill="x", pady=5)
+
+            tk.Label(
+                box,
+                text=f"{report['type']} ",
+                font=("Arial", 14, "bold"),
+                bg=self.WHITE,
+                fg=self.TEXT_COLOR
+            ).pack(pady=(0, 3))
+
+            tk.Label(
+                box,
+                text=f"Breed: {report['breed']} | "
+                     f"Location: {report['location']}, Pangasinan",
+                font=("Arial", 10),
+                bg=self.WHITE,
+                fg=self.SUBTEXT_COLOR
+            ).pack()
+
+            tk.Label(
+                box,
+                text="Status: " + report["status"],
+                font=("Arial", 10, "bold"),
+                bg=self.WHITE,
+                fg=self.TEXT_COLOR
+            ).pack(pady=4)
+
+            tk.Label(
+                box,
+                text="Additional Information: " + report["info"],
+                font=("Arial", 10),
+                bg=self.WHITE,
+                fg=self.SUBTEXT_COLOR,
+                wraplength=800,
+                justify="center"
+            ).pack()
+
+            tk.Label(
+                box,
+                text="Reported by: " + report["reported_by"],
+                font=("Arial", 9),
+                bg=self.WHITE,
+                fg=self.SUBTEXT_COLOR
+            ).pack(pady=(3, 0))
+
+    # =====================================================
+    # APPLICATION FORM
+    # =====================================================
+
+    def show_application_form(self):
+        self.clear_content()
+        self.make_title("Application Form")
+
+        frame = tk.Frame(self.content_frame, bg=self.BG_COLOR)
+        frame.pack(fill="both", expand=True, padx=40)
+
+        my_apps = [
+            app for app in self.applications
+            if app["username"] == self.current_user
+        ]
+
+        if not my_apps:
+            self.make_message("You have no adoption applications yet.")
+            return
+
+        for application in my_apps:
+            box = tk.Frame(frame, bg=self.WHITE, padx=10, pady=12)
+            box.pack(fill="x", pady=5)
+
+            tk.Label(
+                box,
+                text=application["pet"],
+                font=("Arial", 15, "bold"),
+                bg=self.WHITE,
+                fg=self.TEXT_COLOR
+            ).pack(pady=4)
+
+            tk.Label(
+                box,
+                text=f"Breed: {application['breed']} | Age: {application['age']}",
+                font=("Arial", 10),
+                bg=self.WHITE,
+                fg=self.SUBTEXT_COLOR
+            ).pack()
+
+            status = application["status"]
+            color = (
+                self.GREEN if status == "Approved"
+                else self.RED if status == "Rejected"
+                else self.YELLOW
+            )
+
+            tk.Label(
+                box,
+                text="Status: " + status,
+                font=("Arial", 11, "bold"),
+                bg=self.WHITE,
+                fg=color
+            ).pack(pady=6)
+
+    # =====================================================
+    # PROFILE
+    # =====================================================
+
+    def show_profile(self):
+        self.clear_content()
+        self.make_title("Profile")
+
+        user = self.accounts[self.current_user]
+
+        frame = tk.Frame(self.content_frame, bg=self.BG_COLOR)
+        frame.pack(fill="both", expand=True, padx=40)
+
+        info_box = tk.Frame(frame, bg=self.WHITE, padx=10, pady=12)
+        info_box.pack(fill="x")
+
+        tk.Label(
+            info_box,
+            text="User Information",
+            font=("Arial", 17, "bold"),
+            bg=self.WHITE,
+            fg=self.TEXT_COLOR
+        ).pack(pady=(0, 8))
+
+        for label, value in [
+            ("First Name", user["first_name"]),
+            ("Second Name", user["second_name"]),
+            ("Username", self.current_user)
+        ]:
+            tk.Label(
+                info_box,
+                text=f"{label}: {value}",
+                font=("Arial", 11),
+                bg=self.WHITE,
+                fg=self.TEXT_COLOR
+            ).pack(pady=2)
+
+        records_box = tk.Frame(frame, bg=self.WHITE, padx=10, pady=10)
+        records_box.pack(fill="x", pady=12)
+
+        tk.Label(
+            records_box,
+            text="Your Records",
+            font=("Arial", 17, "bold"),
+            bg=self.WHITE,
+            fg=self.TEXT_COLOR
+        ).pack(pady=(0, 8))
+
+        posts = [
+            pet for pet in self.pets
+            if pet["posted_by"] == self.current_user
+        ]
+
+        self.add_profile_record(
+            records_box,
+            "Your Posts",
+            posts,
+            lambda p: f"{p['name']} - {p['breed']} ({p['status']})"
+        )
+
+        self.add_profile_record(
+            records_box,
+            "Adopted Pets",
+            user["adopted"],
+            lambda p: f"{p['name']} - {p['breed']}"
+        )
+
+        self.add_profile_record(
+            records_box,
+            "Rescued Pets",
+            user["rescued"],
+            lambda p: f"{p['name']} - {p['breed']}"
+        )
+
+    def add_profile_record(self, parent, heading, records, formatter):
+        tk.Label(
+            parent,
+            text=heading,
+            font=("Arial", 11, "bold"),
+            bg=self.WHITE,
+            fg=self.NAV_COLOR
+        ).pack(pady=(4, 1))
+
+        if not records:
+            tk.Label(
+                parent,
+                text="No records.",
+                font=("Arial", 9),
+                bg=self.WHITE,
+                fg=self.SUBTEXT_COLOR
+            ).pack()
+            return
+
+        for record in records:
+            tk.Label(
+                parent,
+                text=formatter(record),
+                font=("Arial", 9),
+                bg=self.WHITE,
+                fg=self.TEXT_COLOR
+            ).pack()
+
+    # =====================================================
+    # ADMIN
+    # =====================================================
+
+    def open_admin(self):
+        admin_passkey = "PETLINKADMIN2026"
+
+        entered_key = simpledialog.askstring(
+            "Admin Access",
+            "Enter the admin passkey:",
+            show="*",
+            parent=self.root
+        )
+
+        if entered_key is None:
+            return
+
+        if entered_key != admin_passkey:
+            messagebox.showerror("Access Denied", "Incorrect admin passkey.")
+            return
+
+        self.show_admin()
+
+    def show_admin(self):
+        self.clear_content()
+        self.make_title("Admin - Adoption Applications")
+
+        tk.Label(
+            self.content_frame,
+            text="Review applications and approve or reject each request.",
+            font=("Arial", 11),
+            bg=self.BG_COLOR,
+            fg=self.SUBTEXT_COLOR
+        ).pack(pady=(0, 10))
+
+        canvas = tk.Canvas(
+            self.content_frame,
+            bg=self.BG_COLOR,
+            highlightthickness=0
+        )
+        scrollbar = tk.Scrollbar(
+            self.content_frame,
+            orient="vertical",
+            command=canvas.yview
+        )
+        list_frame = tk.Frame(canvas, bg=self.BG_COLOR)
+
+        list_frame.bind(
+            "<Configure>",
+            lambda event: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+
+        window_id = canvas.create_window(
+            (0, 0),
+            window=list_frame,
+            anchor="nw"
+        )
+
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.bind(
+            "<Configure>",
+            lambda event: canvas.itemconfigure(
+                window_id, width=event.width
+            )
+        )
+
+        canvas.pack(side="left", fill="both", expand=True, padx=(30, 0))
+        scrollbar.pack(side="right", fill="y", padx=(0, 25))
+
+        if not self.applications:
+            tk.Label(
+                list_frame,
+                text="No adoption applications yet.",
+                font=("Arial", 13),
+                bg=self.BG_COLOR,
+                fg=self.SUBTEXT_COLOR
+            ).pack(pady=30)
+            return
+
+        for application in self.applications:
+            box = tk.Frame(list_frame, bg=self.WHITE, padx=15, pady=10)
+            box.pack(fill="x", pady=6, padx=5)
+
+            tk.Label(
+                box,
+                text=application["pet"],
+                font=("Arial", 15, "bold"),
+                bg=self.WHITE,
+                fg=self.TEXT_COLOR
+            ).pack(pady=4)
+
+            tk.Label(
+                box,
+                text=f"Applicant: {application['username']} | "
+                     f"Breed: {application['breed']} | Age: {application['age']}",
+                font=("Arial", 10),
+                bg=self.WHITE,
+                fg=self.SUBTEXT_COLOR
+            ).pack(pady=2)
+
+            status = application["status"]
+            color = (
+                self.GREEN if status == "Approved"
+                else self.RED if status == "Rejected"
+                else self.YELLOW
+            )
+
+            tk.Label(
+                box,
+                text="Status: " + status,
+                font=("Arial", 11, "bold"),
+                bg=self.WHITE,
+                fg=color
+            ).pack(pady=5)
+
+            if status == "Pending":
+                actions = tk.Frame(box, bg=self.WHITE)
+                actions.pack(pady=4)
+
+                tk.Button(
+                    actions,
+                    text="Approve",
+                    bg=self.GREEN,
+                    fg=self.WHITE,
+                    bd=0,
+                    padx=16,
+                    pady=5,
+                    cursor="hand2",
+                    command=lambda a=application:
+                    self.review_application(a, "Approved")
+                ).pack(side="left", padx=6)
+
+                tk.Button(
+                    actions,
+                    text="Reject",
+                    bg=self.RED,
+                    fg=self.WHITE,
+                    bd=0,
+                    padx=16,
+                    pady=5,
+                    cursor="hand2",
+                    command=lambda a=application:
+                    self.review_application(a, "Rejected")
+                ).pack(side="left", padx=6)
+
+    def review_application(self, application, decision):
+        if application["status"] != "Pending":
+            messagebox.showinfo(
+                "PetLink",
+                "This application has already been reviewed."
+            )
+            return
+
+        pet = application.get("pet_record")
+
+        if decision == "Approved":
+            if pet is not None:
+                if pet["status"] != "Available":
+                    messagebox.showwarning(
+                        "PetLink",
+                        "This pet is no longer available. The application "
+                        "cannot be approved."
+                    )
+                    application["status"] = "Rejected"
+                    self.show_admin()
+                    return
+
+                pet["status"] = "Not Available"
+                pet["adopted_by"] = application["username"]
+
+            application["status"] = "Approved"
+
+            applicant = application["username"]
+            if applicant in self.accounts:
+                self.accounts[applicant]["adopted"].append({
+                    "name": application["pet"],
+                    "breed": application["breed"],
+                    "age": application["age"],
+                    "status": "Not Available"
+                })
+
+            message = "The adoption application has been approved."
+
+        else:
+            application["status"] = "Rejected"
+            message = "The adoption application has been rejected."
+
+        messagebox.showinfo("Application Updated", message)
+        self.show_admin()
+
+    # =====================================================
+    # LOGOUT
+    # =====================================================
+
+    def logout(self):
+        answer = messagebox.askyesno(
+            "Log Out",
+            "Are you sure you want to log out?"
+        )
+
+        if answer:
+            self.current_user = None
+            self.show_login()
+
+
+# =========================================================
+# RUN PROGRAM
+# =========================================================
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = PetLink(root)
+    root.mainloop()
